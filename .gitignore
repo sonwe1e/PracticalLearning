@@ -1,0 +1,5 @@
+**/checkpoints/
+**/runs/
+**/wandb/
+/ObjectDetection/YOLO/yolov8m.pt
+**/__pycache__/
