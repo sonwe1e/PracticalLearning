@@ -1,5 +1,6 @@
 **/checkpoints/
 **/runs/
 **/wandb/
-/ObjectDetection/YOLO/yolov8m.pt
 **/__pycache__/
+/ObjectDetection/YOLO/yolov8m.pt
+**/best_model.pt
