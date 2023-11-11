@@ -62,7 +62,7 @@ class DDPM_Unet(nn.Module):
             TimeResidualBlock(channels[0], channels[0]),
             nn.Conv2d(channels[0], in_channels, kernel_size=3, padding=1),
         )
-        self.time_embedding = nn.Embedding(1001, 1280)
+        self.time_embedding = nn.Embedding(5001, 1280)
 
     def forward(self, x, t):
         t = self.time_embedding(t).view(-1, 1280)
