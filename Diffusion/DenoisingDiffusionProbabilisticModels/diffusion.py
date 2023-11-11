@@ -111,7 +111,7 @@ class GaussianDiffusion(torch.nn.Module):
         )
 
     @torch.no_grad()
-    def sample(self, n, T, image_size=(32, 32)):
+    def sample(self, n, T, image_size=(3, 32, 32), save_interval=True):
         """
         采样生成图像。
 
@@ -124,7 +124,9 @@ class GaussianDiffusion(torch.nn.Module):
         - 生成的图像样本。
         """
         self.model.eval()  # 将模型设置为评估模式
-        samples = torch.randn(n, 3, *image_size, device=self.betas.device)  # 生成初始随机样本
+        samples = torch.randn(n, *image_size, device=self.betas.device)  # 生成初始随机样本
+        if save_interval:
+            interval = []
         for i in tqdm(reversed(range(1, T)), position=0):  # 从T逆序迭代到1
             t = torch.ones(9, dtype=torch.long, device=self.betas.device) * i  # 创建一个全是时间步i的张量
             predicted_noise = self.model(samples, t)  # 使用模型预测噪声
@@ -143,7 +145,8 @@ class GaussianDiffusion(torch.nn.Module):
                 * (samples - ((1 - alpha) / (torch.sqrt(1 - alpha_bar))) * predicted_noise)
                 + torch.sqrt(beta) * noise
             )
-        return samples  # 返回生成的图像样本
+            interval.append(samples) if save_interval else 0
+        return samples, interval  # 返回生成的图像样本
     
 class Trainer(object):
     def __init__(self, diffusion, data_path, device=torch.device('cuda:0'), image_size=128, batch_size=64, augment_horizontal_flip=True, learning_rate=1e-3):
