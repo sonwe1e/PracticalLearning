@@ -1,0 +1,21 @@
+# project init
+project: "PracticalLearning"
+exp_name: "baseline"
+save_wandb: True
+seed: 3407
+num_workers: 8
+gpu_ids: "[0]"
+val_check: 1.0
+# dataset
+image_path: "/home/sonwe1e/WorkStation/Dataset/FlickrFacesHQ/BIx16_down/"
+# train setting
+batch_size: 64
+learning_rate: 0.002
+weight_decay: 0.002
+epochs: 200
+image_size: 64
+# model setting
+channels: [64, 128, 256, 512]
+channels_div: 1
+n_embeddings: 1024
+beta: 0.25

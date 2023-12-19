@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class DDPM_Unet(nn.Module):
+class Unet(nn.Module):
     def __init__(self, in_channels=3, channels=[128, 256, 512]):
         super().__init__()
         self.encoder1 = SwitchSequential(
@@ -79,7 +79,7 @@ class DDPM_Unet(nn.Module):
 
 
 if __name__ == "__main__":
-    model = DDPM_Unet()
+    model = Unet()
     x = torch.randn(1, 3, 32, 32)
     t = torch.randn(1, 1280)
     y = model(x, t)

@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class DDPM_Unet(nn.Module):
+class Unet(nn.Module):
     def __init__(self, in_channels=3, channels=[128, 256, 512]):
         super().__init__()
         self.encoder1 = SwitchSequential(
@@ -62,13 +62,14 @@ class DDPM_Unet(nn.Module):
             TimeResidualBlock(channels[0], channels[0]),
             nn.Conv2d(channels[0], in_channels, kernel_size=3, padding=1),
         )
-        self.time_embedding = nn.Embedding(5001, 1280)
+        self.time_embedding = nn.Embedding(1001, 1280)
 
     def forward(self, x, t):
         t = self.time_embedding(t).view(-1, 1280)
         x1 = self.encoder1(x, t)
         x2 = self.encoder2(x1, t)
         x3 = self.encoder3(x2, t)
+
         x4 = self.bottleneck(x3, t)
 
         x = self.decoder1(torch.cat([x3, x4], dim=1), t)
@@ -79,8 +80,8 @@ class DDPM_Unet(nn.Module):
 
 
 if __name__ == "__main__":
-    model = DDPM_Unet()
+    model = Unet()
     x = torch.randn(1, 3, 32, 32)
-    t = torch.randn(1, 1280)
+    t = torch.ones(1, 1280).long()
     y = model(x, t)
     print(y.shape)

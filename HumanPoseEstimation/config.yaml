@@ -1,0 +1,14 @@
+# project init
+root_path: '/home/sonwe1e/WorkStation/Dataset/MPII/'
+project: "HumanPoseEstimation"
+batch_size: 16
+learning_rate: 0.001
+weight_decay: 0.002
+epochs: 200
+gpu_ids: "[0]"
+seed: 3407
+exp_name: "DeepPose"
+save_wandb: True
+num_workers: 8
+num_joints: 15
+val_check: 1.0

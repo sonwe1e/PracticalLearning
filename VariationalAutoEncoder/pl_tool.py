@@ -42,18 +42,22 @@ class VAE(pl.LightningModule):
 
     def training_step(self, train_batch, batch_idx):
         image = train_batch
-        r_img, z, mu, std = self.model(image)
-        loss, recons_loss, kld_loss = self.model.loss_function(r_img, image, mu, std)
+        # r_img, z, mu, std = self.model(image)
+        # loss, recons_loss, kld_loss = self.model.loss_function(r_img, image, mu, std)
+        r_image, z, loss = self.model(image)
+        recons_loss = self.model.loss_function(r_image, image)
         self.log("train_loss", loss)
         self.log("train_recons_loss", recons_loss)
-        self.log("train_kld_loss", kld_loss)
+        # self.log("train_kld_loss", kld_loss)
         self.log("learning_rate", self.scheduler.get_last_lr()[0])
-        return loss
+        return loss + recons_loss
 
     def validation_step(self, val_batch, batch_idx):
         image = val_batch
-        r_img, z, mu, std = self.model(image)
-        loss, recons_loss, kld_loss = self.model.loss_function(r_img, image, mu, std)
+        # r_img, z, mu, std = self.model(image)
+        # loss, recons_loss, kld_loss = self.model.loss_function(r_img, image, mu, std)
+        r_image, z, loss = self.model(image)
+        recons_loss = self.model.loss_function(r_image, image)
         self.log("valid_loss", loss)
         self.log("valid_recons_loss", recons_loss)
-        self.log("valid_kld_loss", kld_loss)
+        # self.log("valid_kld_loss", kld_loss)

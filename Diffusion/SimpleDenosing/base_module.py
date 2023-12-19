@@ -26,33 +26,6 @@ class SelfAttention(nn.Module):
         return attn
 
 
-class CrossAttention(nn.Module):
-    def __init__(self, n_head, d_embed, d_cross, in_proj_bias=True, out_proj_bias=True):
-        super().__init__()
-        self.q_in_proj = nn.Linear(d_embed, d_embed, bias=in_proj_bias)
-        self.kv_in_proj = nn.Linear(d_cross, d_embed * 2, bias=in_proj_bias)
-        self.out_proj = nn.Linear(d_embed, d_embed, bias=out_proj_bias)
-        self.n_head = n_head
-        self.d_head = d_embed // n_head
-
-    def forward(self, x, y):
-        batch_size, seq_len, d_embed = x.size()
-        q = (
-            self.q_in_proj(x)
-            .view(batch_size, -1, self.n_head, self.d_head)
-            .transpose(1, 2)
-        )
-        k, v = self.kv_in_proj(y.float()).chunk(2, dim=-1)
-        k = k.view(batch_size, -1, self.n_head, self.d_head).transpose(1, 2)
-        v = v.view(batch_size, -1, self.n_head, self.d_head).transpose(1, 2)
-        attn = (q @ k.transpose(-2, -1)) / math.sqrt(self.d_head)
-        attn = F.softmax(attn, dim=-1)
-        attn = attn @ v
-        attn = attn.transpose(1, 2).reshape(batch_size, seq_len, d_embed)
-        attn = self.out_proj(attn)
-        return attn
-
-
 class AttentionBlock(nn.Module):
     def __init__(self, channels):
         super().__init__()
@@ -141,69 +114,6 @@ class TimeResidualBlock(nn.Module):
         x = self.conv2(x)
 
         x = x + self.residual_layer(residual)
-        return x
-
-
-class MultiModalAttentionBlock(nn.Module):
-    def __init__(self, n_head, n_embed, d_context=512):
-        super().__init__()
-        self.gn = nn.GroupNorm(32, n_embed)
-        self.conv_in = nn.Conv2d(n_embed, n_embed, kernel_size=1)
-        self.conv_out = nn.Conv2d(n_embed, n_embed, kernel_size=1)
-
-        self.ln1 = nn.LayerNorm(n_embed)
-        self.ln2 = nn.LayerNorm(n_embed)
-        self.ln3 = nn.LayerNorm(n_embed)
-
-        self.att1 = SelfAttention(n_head, n_embed, in_proj_bias=False)
-        self.att2 = CrossAttention(n_head, n_embed, d_context, in_proj_bias=False)
-
-        self.l1 = nn.Linear(n_embed, 4 * n_embed * 2)
-        self.l2 = nn.Linear(4 * n_embed, n_embed)
-
-        self.act = nn.GELU()
-
-    def forward(self, x, context):
-        residual = x
-        x = self.gn(x)
-        x = self.conv_in(x)
-
-        n, c, h, w = x.shape
-        x = x.view(n, c, -1).transpose(1, 2)
-
-        residual_t = x
-        x = self.ln1(x)
-        x = self.att1(x)
-        x += residual_t
-
-        residual_t = x
-        x = self.ln2(x)
-        x = self.att2(x, context)
-        x += residual_t
-
-        residual_t = x
-        x = self.ln3(x)
-        x, gate = self.l1(x).chunk(2, dim=-1)
-        x = x * self.act(gate)
-        x = self.l2(x)
-        x += residual_t
-
-        x = x.transpose(1, 2).view(n, c, h, w)
-
-        x = self.conv_out(x) + residual
-        return x
-
-
-class Upsample(nn.Module):
-    def __init__(self, channels):
-        super().__init__()
-        self.conv = nn.Conv2d(channels, channels, kernel_size=3, padding=1)
-        self.act = nn.SiLU()
-
-    def forward(self, x):
-        x = F.interpolate(x, scale_factor=2, mode="nearest")
-        x = self.conv(x)
-        x = self.act(x)
         return x
 
 

@@ -42,7 +42,7 @@ class VAE_dataset(Dataset):
     ):
         self.transform = transform
         self.image_size = image_size
-        self.image_list = glob.glob(os.path.join(image_path, "*"))[:1000]
+        self.image_list = glob.glob(os.path.join(image_path, "*"))
         random.shuffle(self.image_list)
         self.image_list = (
             self.image_list[: int(len(self.image_list) * 0.8)]

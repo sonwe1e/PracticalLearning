@@ -13,16 +13,16 @@ torch.set_float32_matmul_precision("high")
 
 
 if __name__ == "__main__":
-    """获取 config"""
-    with open("./config/vqvae.yaml") as f:
+    with open("./config.yaml") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
     """定义网络"""
-    from model.vqvae import vqvae
+    from model.CPM import CPM
 
-    model = vqvae(config)
+    model = CPM(config["num_joints"])
+
     "Compile"
-    # model = torch.compile(model)
+    model = torch.compile(model)
 
     # Define dataloader
     train_dataloader, valid_dataloader = get_dataloader(config)
@@ -49,18 +49,19 @@ if __name__ == "__main__":
         callbacks=[
             pl.callbacks.ModelCheckpoint(
                 dirpath=f"./checkpoints/" + config["exp_name"],
-                monitor="valid_loss",
-                mode="min",
+                monitor="valid_pckh50",  # "train_loss",
+                mode="max",
                 save_top_k=1,
-                save_last=False,
-                filename="{epoch}-{valid_loss:.4f}",
+                save_last=True,
+                filename="{epoch}-{valid_pckh50:.4f}",
             ),
         ],
     )
 
     # Start training
     trainer.fit(
-        VAE(config, model, len(train_dataloader)),
+        HumanPoseEstimation(config, model, len(train_dataloader)),
         train_dataloaders=train_dataloader,
         val_dataloaders=valid_dataloader,
     )
+    wandb.finish()
