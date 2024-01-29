@@ -21,12 +21,12 @@ def parse_args():
     # training setups
     parser.add_argument("-wd", "--weight_decay", type=float, default=2e-4)
     parser.add_argument("-lr", "--learning_rate", type=float, default=2e-4)
-    parser.add_argument("-bs", "--batch_size", type=int, default=256)
+    parser.add_argument("-bs", "--batch_size", type=int, default=64)
     parser.add_argument("-e", "--epochs", type=int, default=100)
     parser.add_argument("--num_workers", type=int, default=8)
 
     # experiment
-    parser.add_argument("--exp_name", type=str, default="selfnet+112")
+    parser.add_argument("--exp_name", type=str, default="mobilenet18v3")
     parser.add_argument("--val_check", type=float, default=1.0)
     parser.add_argument("--log_step", type=int, default=10)
 

@@ -18,14 +18,9 @@ torch.set_float32_matmul_precision("high")
 if __name__ == "__main__":
     opt = get_option()
     """定义网络"""
-    # model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
-    # model.fc = torch.nn.Linear(512, 200)
-    from ImageClassification.model import inceptionv1
+    from model import selfnet
 
-    model = inceptionv1.inceptionv1()
-
-    """模型编译"""
-    # model = torch.compile(model)
+    model = selfnet.selfnet(selfnet.MOBILENETV3)
 
     """导入数据集"""
     train_dataloader, valid_dataloader = get_dataloader(opt)
